@@ -1,2 +1,2 @@
 # Trabalhos
-Alguns trabalhos que realizei na disciplina de Comp 2
+Alguns trabalhos que realizei na disciplina de Comp. II utiliando a linguagem Python
