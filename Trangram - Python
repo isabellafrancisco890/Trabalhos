@@ -1,0 +1,180 @@
+from tkinter import Tk, Canvas, StringVar, Label, Button
+import tkinter as tk
+import tkinter as Canvas
+import numpy as np
+
+
+class Tangram:
+    def __init__(self, root):
+        self.canvas = tk.Canvas(root, width=2000, height=900, bg='white')
+        self.canvas.pack()
+
+
+        self.peças = [
+            self.criar_triangulo([(150, 600), (275.20, 475.20), (400, 600)], 'lightblue'),  # Triângulo grande 1
+            self.criar_triangulo([(150, 600), (275.20, 475.20), (150, 350)], 'lightgreen'),  # Triângulo grande 2
+            self.criar_triangulo([(400, 600), (337.60, 537.60), (400, 475)], 'lightcoral'),  # Triângulo médio
+            self.criar_triangulo([(400, 475), (400, 350), (275, 350)], 'lightcyan'),  # Triângulo pequeno
+            self.criar_triangulo([(337.50, 412.50), (275.2, 475.2), (212.60, 412.60)], 'lightgray'),  # Triângulo pequeno 2
+            self.criar_quadrado([(275.20, 475.20), (337.50, 412.50), (400, 475), (337.60, 537.60)], 'lightpink'),  # Quadrado
+            self.criar_paralelogramo([(150, 350), (275, 350), (337.50, 412.50), (212.60, 412.60)], 'lightyellow')  # Paralelogramo
+        ]
+
+
+    def criar_triangulo(self, pontos, cor):
+        return self.canvas.create_polygon(pontos, outline='black', fill=cor, width=2)
+
+
+    def criar_quadrado(self, pontos, cor):
+        return self.canvas.create_polygon(pontos, outline='black', fill=cor, width=2)
+
+
+    def criar_paralelogramo(self, pontos, cor):
+        return self.canvas.create_polygon(pontos, outline='black', fill=cor, width=2)
+
+
+
+
+class MovimentarPeça:
+    def __init__(self, canvas):
+        self.canvas = canvas
+        self.selecionada = None
+        self.offset_x = 0
+        self.offset_y = 0
+
+
+        self.canvas.bind("<Button-1>", self.selecionar_peça) #selecionar os itens com botão esquerdo
+        self.canvas.bind("<B1-Motion>", self.mover_peça) #movimentar como mouse o item selecionado
+        self.canvas.bind("<Double-Button-1>", self.rotacionar_peça) #rotacionar o item com clique duplo
+
+
+    def selecionar_peça(self, event):
+        peça = self.canvas.find_closest(event.x, event.y)
+        if peça:
+            self.selecionada = peça[0]
+            self.offset_x = event.x
+            self.offset_y = event.y
+
+
+    def mover_peça(self, event):
+        if self.selecionada:
+            dx = event.x - self.offset_x
+            dy = event.y - self.offset_y
+            self.canvas.move(self.selecionada, dx, dy)
+            self.offset_x = event.x
+            self.offset_y = event.y
+
+
+    def rotacionar_peça(self, event, teta = np.pi/4):
+        if self.selecionada:
+
+
+            #coordenadas das peças selecionadas
+            coords = self.canvas.coords(self.selecionada)
+
+
+            # transforma a matriz em pares de pontos, copiando a anterior.
+            #Para que seja possivel fazer o produto de matrizes com o matriz de rotação
+            pontos = np.array(coords).reshape(-1,2)
+
+
+            #centro do objeto de rotação
+            centro = np.mean(pontos, axis = 0)
+
+
+            #matriz de rotação
+            R = np.array([
+                [np.cos(teta), -np.sin(teta)],
+                [np.sin(teta), np.cos(teta)]
+            ])
+
+
+            #subtrai os pares de pontos em relação ao centro e realiza o produto matricial.
+            #a soma dos pontos do centro é para que a peça volte retorne para o seu ponto de origem
+            novos_pontos = (pontos - centro) @ R + centro
+
+
+            #ATUALIZA AS COORDENADAS DAS PEÇAS
+            novas_coords = novos_pontos.flatten().tolist()
+            self.canvas.coords(self.selecionada, *novas_coords)
+
+
+def main():
+    if __name__ == "__main__":
+        root = tk.Tk()
+        root.title("Jogo de Tangram")
+        tangram = Tangram(root)
+        MovimentarPeça(tangram.canvas)
+        root.mainloop()
+       
+
+
+a = 'Tangram é um antigo jogo chinês, que consiste na formação de figuras e desenhos por meio de 7 peças:'
+b = '5 triângulos, 1 quadrado e 1 paralelogramo.'
+c = 'Não se sabe exatamente quando o jogo surgiu, embora exista uma lenda sobre tal criação.'
+d = 'Segundo a mesma, um imperador chinês quebrou um espelho, e ao tentar juntar os pedaços e remontá-lo,'
+e = 'percebeu que poderia construir muitas formas com seus cacos. Assim surgindo a ideia do jogo.'
+f = 'TUTORIAL:'
+g = '- PARA MOVIMENTAR AS PEÇAS PRESSIONE O BOTÃO ESQUERDO DO MOUSE E ARRASTE.'
+h = '- PARA ROTACIONAR A PEÇA CLIQUE DUAS VEZES NO BOTÃO ESQUERDO DO MOUSE!'
+i = 'APROVEITE O JOGO!'
+k = "                                                                                                    "
+l='                                                                                                      '
+inicio = Tk()
+inicio.title('JOGO DE TANGRAM')
+inicio.geometry('2000x900')  # muda o tamanho da janela
+
+
+text1 = Label(inicio, text='ESTE É UM JOGO CHAMADO TANGRAM!',font=("Arial 20 bold"),fg = 'red')
+text1.grid(column = 0,row = 0,padx = 10, pady = 10)
+
+
+text2 = Label(inicio, text = a, font = 'Arial 15',fg = 'black')
+text2.grid(column = 0,row = 1,padx = 10, pady = 5)
+
+
+text3 = Label(inicio, text = b, font = 'Arial 15',fg = 'black')
+text3.grid(column = 0,row = 2,padx = 10, pady = 5)
+
+
+text4 = Label(inicio, text = c, font = 'Arial 15',fg = 'black')
+text4.grid(column = 0,row = 3,padx = 10, pady = 5)
+
+
+text5 = Label(inicio, text = d, font = 'Arial 15',fg = 'black')
+text5.grid(column = 0,row = 4,padx = 10, pady = 5)
+
+
+text6 = Label(inicio, text = e, font = 'Arial 15',fg = 'black')
+text6.grid(column = 0,row = 5,padx = 10, pady = 5)
+
+
+text7 = Label(inicio, text = f, font = 'Arial 20 bold',fg = 'lightgreen')
+text7.grid(column = 0,row = 7,padx = 0, pady = 5)
+
+
+text8 = Label(inicio, text = g, font = 'Arial 15',fg = 'black')
+text8.grid(column = 0,row = 8,padx = 10, pady = 5)
+
+
+text9 = Label(inicio, text = h, font = 'Arial 15',fg = 'black')
+text9.grid(column = 0,row = 9,padx = 10, pady = 5)
+
+
+text10 = Label(inicio, text = i, font = 'Arial 20 bold',fg = '#89CFF0')
+text10.grid(column = 0,row = 11,padx = 10, pady = 10)
+
+
+text11 = Label(inicio, text = k, font = 'Arial 15',fg = 'red')
+text11.grid(column = 0,row = 6,padx = 10, pady = 45)
+
+
+text12 = Label(inicio, text = l, font = 'Arial 15',fg = 'red')
+text12.grid(column = 0,row = 10,padx = 10, pady = 45)
+
+
+botao1 = Button(inicio, text = 'clique aqui para iniciar o jogo!',font=("Arial", 14), fg="white", bg="black" ,command=lambda: [inicio.destroy(), main()])#lambda cria uma função anônima sem nome que executa o que vem depois dos dois pontos(:)
+botao1.grid(column = 0,row = 900,padx = 1, pady = 5 )
+
+
+inicio.mainloop()
